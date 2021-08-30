@@ -1,0 +1,15 @@
+{
+    "name": "yuxiaobo/jumdata",
+    "description": "聚美智数接口",
+    "license": "mit",
+    "authors": [
+        {
+            "name": "edk24",
+            "email": "yuxiaobo64@gmail.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "~6.0",
+        "phpunit/phpunit": "^9.5"
+    }
+}
