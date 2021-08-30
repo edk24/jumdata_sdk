@@ -1,9 +1,9 @@
 <?php
 namespace jumdata\test;
 
+require_once '../src/Sms.php';
 use jumdata\Sms;
 use PHPUnit\Framework\TestCase;
-require_once './src/Sms.php';
 
 class SmsTest extends TestCase  {
 
