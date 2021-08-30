@@ -3,6 +3,12 @@
 
 [官网](https://my.jumdata.com/home)
 
+**安装**
+
+```
+composer require yuxiaobo/jumdata
+```
+
 ## 短信SDK
 > 已完成
 
