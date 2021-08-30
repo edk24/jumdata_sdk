@@ -10,9 +10,11 @@ use function GuzzleHttp\Psr7\build_query;
 /**
  * 短信SDK
  */
-class Sms { 
+class Sms {
+
     protected $app_id = null;
     protected $app_secret = null;
+    // 调试模式
     protected $debug = false;
 
 
