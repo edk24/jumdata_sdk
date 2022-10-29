@@ -1,11 +1,17 @@
 <?php
 namespace jumdata\test;
 
-require_once '../src/Sms.php';
+// require_once '../src/Sms.php';
 use jumdata\Sms;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Dotenv\Dotenv;
+
+$env = new Dotenv();
+$env->load(dirname(__DIR__) . '/.env');
 
 class SmsTest extends TestCase  {
+
+
 
     /**
      * 测试发送短信
@@ -13,9 +19,10 @@ class SmsTest extends TestCase  {
      * @return void
      */
     public function testSend() {
-        $this->assertIsObject($obj = new Sms('', ''));
-        $this->assertIsArray($result = $obj->send('18311548014', 'MB717503B8', ['5678']));
-        echo json_encode($result);
+        $sms = new Sms($_ENV['APPID'], $_ENV['APPSECRET']);
+        list($success, $response) = $sms->send('18311548014', 'MB717503B8', ['5678']);
+        $this->assertTrue($success);
+        $this->assertIsArray($response);
     }
 
     /**
@@ -23,9 +30,9 @@ class SmsTest extends TestCase  {
      * @test
      */
     public function testGetTemplateList() {
-        $this->assertIsObject($obj = new Sms('', ''));
-        $this->assertIsArray($result = $obj->getTemplateList());
-        echo json_encode($result);
+        $sms = new Sms($_ENV['APPID'], $_ENV['APPSECRET']);
+        list($success, $response) = $sms->getTemplateList();
+        $this->assertTrue($success);
     }
 
     /**
@@ -33,9 +40,9 @@ class SmsTest extends TestCase  {
      * @test
      */
     public function testDetail() {
-        $this->assertIsObject($obj = new Sms('', ''));
-        $this->assertIsArray($result = $obj->detail('JS6656739414542289'));
-        echo json_encode($result);
+        $sms = new Sms($_ENV['APPID'], $_ENV['APPSECRET']);
+        list($success, $response) = $sms->detail('JS6656739414542289', '18311548014');
+        $this->assertTrue($success);
     }
 
     /**
@@ -43,8 +50,8 @@ class SmsTest extends TestCase  {
      * @test
      */
     public function testGetSignList() {
-        $this->assertIsObject($obj = new Sms('', ''));
-        $this->assertIsArray($result = $obj->getSignList());
-        var_dump($result);
+        $sms = new Sms($_ENV['APPID'], $_ENV['APPSECRET']);
+        list($success, $response) = $sms->getSignList();
+        $this->assertTrue($success);
     }
 }

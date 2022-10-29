@@ -2,10 +2,6 @@
 
 namespace jumdata;
 
-use GuzzleHttp\RequestOptions;
-use Psr\Http\Message\RequestInterface;
-
-use function GuzzleHttp\Psr7\build_query;
 
 /**
  * 短信SDK
@@ -32,9 +28,10 @@ class Sms {
      * @param string $mobile 手机号
      * @param string $template_id 短信模板id
      * @param array $tag 参数，用做替代模板中的@1@变量
-     * @return array
+     * @return array [bool:success, array:responseArray]
+     * @throws \GuzzleHttp\Exception\*
      */
-    public function send($mobile, $template_id, $tag=[]) {
+    public function send(string $mobile, string $template_id, array $tag=[]):array {
         $client = new \GuzzleHttp\Client([
             'base_uri'        => 'https://api.jumdata.com/',
             'timeout'         => 0,
@@ -50,20 +47,46 @@ class Sms {
         ];
 
         $response = $client->post('/sms/send', ['multipart' => $data]);
-        if ($response->getStatusCode() != 200) {
-            return null;
+        $responseArr = json_decode($response->getBody()->getContents(), true);
+
+        $success = false;
+        if (isset($responseArr['success']) && $responseArr['success'] == true) {
+            $success = true;
         }
-        return json_decode($response->getBody()->getContents(), true);
+        
+        return [$success, $responseArr];
     }
+
+
+
+
+    
+    /**
+     * 发送原始文本短信
+     *
+     * @param string $mobile
+     * @param string $content
+     * @return array [bool:success, array:responseArr]
+     * @deprecated 
+     * @throws \GuzzleHttp\Exception\*
+     */
+    public function sendRawContent(string $mobile, string $content):array 
+    {
+        throw new \RuntimeException('不支持');
+    }
+
+
+
 
 
     /**
      * 查询短信发送详情
      *
      * @param string $taskid
-     * @return array
+     * @return array [bool:success, array:responseArr]
+     * @throws \GuzzleHttp\Exception\*
      */
-    public function detail($taskid) {
+    public function detail(string $taskid, string $mobile):array {
         $client = new \GuzzleHttp\Client([
             'base_uri'        => 'https://api.jumdata.com/',
             'timeout'         => 0,
@@ -75,22 +98,32 @@ class Sms {
             'timestamp' => time()*1000,
             'sign'      => hash('sha256', $this->app_id . $this->app_secret . time()*1000),
             'taskId'    => $taskid,
+            'mobile'    => $mobile
         ]);
 
         $response = $client->get('/sms/detail?' . $query);
-        if ($response->getStatusCode() != 200) {
-            return null;
+        $responseArr = json_decode($response->getBody()->getContents(), true);
+        
+        $success = false;
+        if (isset($responseArr['success']) && $responseArr['success'] == true) {
+            $success = true;
         }
-        return json_decode($response->getBody()->getContents(), true);
+
+        return [$success, $responseArr];
     }
+
+
+
+
 
     /**
      * 查询短信签名列表
      *
      * @param string $signId 可空，指定短信签名id，留空查询所有
-     * @return void
+     * @return array [bool:success, array:responseArr]
+     * @throws \GuzzleHttp\Exception\*
      */
-    public function getSignList($sign_id='') {
+    public function getSignList(string $sign_id=''):array {
         $client = new \GuzzleHttp\Client([
             'base_uri'        => 'https://api.jumdata.com/',
             'timeout'         => 0,
@@ -105,19 +138,29 @@ class Sms {
         ]);
 
         $response = $client->get('/sms/sign/list?' . $query);
-        if ($response->getStatusCode() != 200) {
-            return null;
+        $responseArr = json_decode($response->getBody()->getContents(), true);
+
+        $success = false;
+        if (isset($responseArr['success']) && $responseArr['success'] == true) {
+            $success = true;
         }
-        return json_decode($response->getBody()->getContents(), true);
+
+        return [$success, $responseArr];
     }
+
+
+
+
+
 
     /**
      * 查询短信模板列表
      *
      * @param string $template_id 可空，指定查询短信模板，留空查询所有
-     * @return array
+     * @return array [bool:success, array:responseArr]
+     * @throws \GuzzleHttp\Exception\*
      */
-    public function getTemplateList($template_id='') {
+    public function getTemplateList(string $template_id=''):array {
         $client = new \GuzzleHttp\Client([
             'base_uri'        => 'https://api.jumdata.com/',
             'timeout'         => 0,
@@ -143,9 +186,13 @@ class Sms {
         ];
         $response = $client->post('/sms/template/list', ['multipart' => $data]);
 
-        if ($response->getStatusCode() != 200) {
-            return null;
+        $responseArr = json_decode($response->getBody()->getContents(), true);
+
+        $success = false;
+        if (isset($responseArr['success']) && $responseArr['success'] == true) {
+            $success = true;
         }
-        return json_decode($response->getBody()->getContents(), true);
+
+        return [$success, $responseArr];
     }
 }
