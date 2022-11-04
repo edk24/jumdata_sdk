@@ -12,13 +12,24 @@ class Sms {
     protected $app_secret = null;
     // 调试模式
     protected $debug = false;
+    /**
+     * 请求客户端
+     *
+     * @var \GuzzleHttp\Client
+     */
+    protected $client;
 
 
-    public function __construct($app_id='', $app_secret='', $debug=false)
+    public function __construct(string $app_id='', string $app_secret='', bool $debug=false, string $baseUrl= 'https://api.jumdata.com/')
     {
         $this->app_id = $app_id;
         $this->app_secret = $app_secret;
         $this->debug = $debug;
+        $this->client = new \GuzzleHttp\Client([
+            'base_uri'        => $baseUrl,
+            'timeout'         => 0,
+            'debug'           => $this->debug
+        ]);
     }
 
 
@@ -32,11 +43,6 @@ class Sms {
      * @throws \GuzzleHttp\Exception\*
      */
     public function send(string $mobile, string $template_id, array $tag=[]):array {
-        $client = new \GuzzleHttp\Client([
-            'base_uri'        => 'https://api.jumdata.com/',
-            'timeout'         => 0,
-            'debug'           => $this->debug
-        ]);
         $data = [
             ['name' => 'appId', 'contents'=>$this->app_id],
             ['name' => 'timestamp', 'contents'=>time()*1000],
@@ -46,7 +52,7 @@ class Sms {
             ['name' => 'sign', 'contents'=>hash('sha256', $this->app_id . $this->app_secret . time()*1000)],
         ];
 
-        $response = $client->post('/sms/send', ['multipart' => $data]);
+        $response = $this->client->post('/sms/send', ['multipart' => $data]);
         $responseArr = json_decode($response->getBody()->getContents(), true);
 
         $success = false;
@@ -86,13 +92,7 @@ class Sms {
      * @return array [bool:success, array:responseArr]
      * @throws \GuzzleHttp\Exception\*
      */
-    public function detail(string $taskid, string $mobile):array {
-        $client = new \GuzzleHttp\Client([
-            'base_uri'        => 'https://api.jumdata.com/',
-            'timeout'         => 0,
-            'debug'           => $this->debug
-        ]);
-        
+    public function detail(string $taskid, string $mobile):array {        
         $query = http_build_query([
             'appId'     => $this->app_id,
             'timestamp' => time()*1000,
@@ -101,7 +101,7 @@ class Sms {
             'mobile'    => $mobile
         ]);
 
-        $response = $client->get('/sms/detail?' . $query);
+        $response = $this->client->get('/sms/detail?' . $query);
         $responseArr = json_decode($response->getBody()->getContents(), true);
         
         $success = false;
@@ -124,12 +124,6 @@ class Sms {
      * @throws \GuzzleHttp\Exception\*
      */
     public function getSignList(string $sign_id=''):array {
-        $client = new \GuzzleHttp\Client([
-            'base_uri'        => 'https://api.jumdata.com/',
-            'timeout'         => 0,
-            'debug'           => $this->debug
-        ]);
-        
         $query = http_build_query([
             'appId'     => $this->app_id,
             'timestamp' => time()*1000,
@@ -137,7 +131,7 @@ class Sms {
             'signId'    => $sign_id,
         ]);
 
-        $response = $client->get('/sms/sign/list?' . $query);
+        $response = $this->client->get('/sms/sign/list?' . $query);
         $responseArr = json_decode($response->getBody()->getContents(), true);
 
         $success = false;
@@ -161,11 +155,6 @@ class Sms {
      * @throws \GuzzleHttp\Exception\*
      */
     public function getTemplateList(string $template_id=''):array {
-        $client = new \GuzzleHttp\Client([
-            'base_uri'        => 'https://api.jumdata.com/',
-            'timeout'         => 0,
-            'debug'           => $this->debug
-        ]);
         $data = [
             [
                 'name'      => 'appId',
@@ -184,7 +173,7 @@ class Sms {
                 'contents'  => hash('sha256', $this->app_id . $this->app_secret . time()*1000)
             ]
         ];
-        $response = $client->post('/sms/template/list', ['multipart' => $data]);
+        $response = $this->client->post('/sms/template/list', ['multipart' => $data]);
 
         $responseArr = json_decode($response->getBody()->getContents(), true);
 

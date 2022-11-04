@@ -19,7 +19,7 @@ class SmsTest extends TestCase  {
      * @return void
      */
     public function testSend() {
-        $sms = new Sms($_ENV['APPID'], $_ENV['APPSECRET']);
+        $sms = new Sms($_ENV['APPID'], $_ENV['APPSECRET'], false, 'https://api.jumdata.com/sms/send-v2/');
         list($success, $response) = $sms->send('18311548014', 'MB717503B8', ['5678']);
         $this->assertTrue($success);
         $this->assertIsArray($response);
