@@ -20,13 +20,13 @@ class Sms {
     protected $client;
 
 
-    public function __construct(string $app_id='', string $app_secret='', bool $debug=false, string $baseUrl= 'https://api.jumdata.com/')
+    public function __construct(string $app_id='', string $app_secret='', bool $debug=false)
     {
         $this->app_id = $app_id;
         $this->app_secret = $app_secret;
         $this->debug = $debug;
         $this->client = new \GuzzleHttp\Client([
-            'base_uri'        => $baseUrl,
+            'base_uri'        => 'https://api.jumdata.com',
             'timeout'         => 0,
             'debug'           => $this->debug
         ]);
@@ -64,6 +64,36 @@ class Sms {
     }
 
 
+    /**
+     * 发送短信通知 (支持携号转网, 比一般短信贵一厘)
+     *
+     * @param string $mobile 手机号
+     * @param string $template_id 短信模板id
+     * @param array $tag 参数，用做替代模板中的@1@变量
+     * @return array [bool:success, array:responseArray]
+     * @throws \GuzzleHttp\Exception\*
+     */
+    public function sendv2(string $mobile, string $template_id, array $tag = []): array
+    {
+        $data = [
+            ['name' => 'appId', 'contents' => $this->app_id],
+            ['name' => 'timestamp', 'contents' => time() * 1000],
+            ['name' => 'receive', 'contents' => $mobile],
+            ['name' => 'templateId', 'contents' => $template_id],
+            ['name' => 'tag', 'contents' => implode('|', $tag)],
+            ['name' => 'sign', 'contents' => hash('sha256', $this->app_id . $this->app_secret . time() * 1000)],
+        ];
+
+        $response = $this->client->post('/sms/send-v2', ['multipart' => $data]);
+        $responseArr = json_decode($response->getBody()->getContents(), true);
+
+        $success = false;
+        if (isset($responseArr['success']) && $responseArr['success'] == true) {
+            $success = true;
+        }
+
+        return [$success, $responseArr];
+    }
 
 
     
